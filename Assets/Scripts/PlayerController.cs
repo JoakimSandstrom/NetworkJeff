@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-public class PlayerController : MonoBehaviour {
+public class PlayerController : NetworkBehaviour {
 
   [SerializeField]
   float movementSpeed = 3f; // Unity-enheter per sekund
@@ -21,6 +22,7 @@ public class PlayerController : MonoBehaviour {
   float timeSinceLastShot = 0f;
 	
 	void Update () {
+    if (!isLocalPlayer) return;
 
     float yRotation = Input.GetAxisRaw("Horizontal") * rotationSpeed * Time.deltaTime;
     float zMovement = Input.GetAxisRaw("Vertical") * movementSpeed * Time.deltaTime;
@@ -41,11 +43,18 @@ public class PlayerController : MonoBehaviour {
         timeSinceLastShot = 0;
       }
     }
-
 	}
 
+  [Command]
   void Fire()
   {
     GameObject bullet = Instantiate(bulletPrefab, bulletSpawnPoint.position, bulletSpawnPoint.rotation);
+    NetworkServer.Spawn(bullet);
   }
+
+  public override void OnStartLocalPlayer()
+  {
+    GetComponent<Renderer>().material.color = Color.green;
+  }
+
 }
